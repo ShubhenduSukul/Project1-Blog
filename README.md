@@ -1,5 +1,4 @@
 # ProjectBlogPost
-
 # Thorium
 Repository for backend cohort - Thorium
 
