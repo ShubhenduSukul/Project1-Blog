@@ -22,45 +22,6 @@ const loginUser = async function (req, res) {
 }
 
 
-// const createBlog = async function (req, res) {
-//   try {
-//     let blog = req.body
-//     if (Object.keys(blog).length == 0)
-//       return res.status(400).send({ status: false, msg: "No data to create a blog" })
-
-//     let author_id = blog.authorId
-//     if (!author_id)
-//       return res.status(400).send({ status: false, msg: "Author Id should be present in the blog data" })
-
-//     if (!ObjectId.isValid(author_id))
-//       return res.status(404).send({ status: false, msg: "AuthorId invalid" });
-
-//     let validAuthor = await AuthorModel.findById(author_id)
-//     if (!validAuthor)
-//       return res.status(404).send({ status: false, msg: "Author data not found" });
-
-//     let blogCreated = await BlogModel.create(blog)
-//     return res.status(201).send({ status: true, data: blogCreated })
-//   } catch (error) {
-//     return res.status(500).send({ status: false, msg: error.message })
-//   }
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 const createBlog = async function (req, res) {
   try {
     let blog = req.body
@@ -98,23 +59,14 @@ const createBlog = async function (req, res) {
 }
 
 
-
 const getBlog = async function (req, res) {
   try {
-    let token = req.headers["x-api-key"]
-    let decodedToken = jwt.verify(token, "room 37")
-    let authorId = decodedToken.authorId
     if (Object.keys(req.query).length == 0) {
-      let finalResult = []
       let result = await BlogModel.find({ isDeleted: false, isPublished: true })
       if (result.length != 0)
-        finalResult.push(...result)
-      let unpublishedBlog = await BlogModel.find({ isDeleted: false, authorId: authorId, isPublished: false })
-      if (unpublishedBlog.length != 0)
-        finalResult.push(...unpublishedBlog)
-      if (finalResult.length == 0)
+        return res.status(200).send({status:true, data: result})
+      if (result.length == 0)
         return res.status(400).send({ status: false, msg: "No blog found" })
-      return res.status(200).send({ status: true, data: finalResult })
     }
 
     let blogKeys = ["title", "auhtorId", "tags", "category", "subCategory"]
@@ -128,21 +80,12 @@ const getBlog = async function (req, res) {
     filterDetails.isDeleted = false;
     filterDetails.isPublished = true;
 
-    let finalResult = [];
     let result = await BlogModel.find(filterDetails)
     if (result.length != 0)
-      finalResult.push(...result);
+      return res.status(200).send({status : true, data: result});
 
-    filterDetails.authorId = authorId
-    filterDetails.isPublished = false
-
-    let unpublishedBlog = await BlogModel.find(filterDetails)
-    if (unpublishedBlog.length != 0)
-      finalResult.push(...unpublishedBlog)
-    if (finalResult.length == 0)
+    if (result.length == 0)
       return res.status(404).send({ status: false, msg: " No blog data found" })
-
-    return res.status(201).send({ status: true, data: finalResult })
   } catch (error) {
     return res.status(500).send({ status: false, msg: error.message })
   }
